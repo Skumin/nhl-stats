@@ -106,3 +106,5 @@ function shots_lf(live_feed_output)
 
     return fullframe
 end
+
+rand(10)
