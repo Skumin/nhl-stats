@@ -58,7 +58,3 @@ function stats_dressed_skaters(box_score_output, side)
     r = NamedTuple{Tuple(player_ids)}(player_sts)
     return r
 end
-
-temp = get_box_score(2018030321)
-homestats = DataFrame(stats_dressed_skaters(temp, :home))
-awaystats = DataFrame(stats_dressed_skaters(temp, :away))
