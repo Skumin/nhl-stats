@@ -1,4 +1,4 @@
-using HTTP, JSON2, DataFrames
+using HTTP, JSON2, DataFrames, CSV
 
 function get_box_score(gameid)
     url = string("https://statsapi.web.nhl.com/api/v1/game/", gameid, "/boxscore")
@@ -117,4 +117,29 @@ function shots_lf(live_feed_output)
     fullframe[:isGoal] = isgoal
 
     return fullframe
+end
+
+function write_shots_lf(gameid, path)
+    if !isdir(path)
+        error("The specified folder doesn't exist. Check the name and try again.")
+    else
+        tbl = get_live_feed(gameid)
+        shots = shots_lf(tbl)
+        shots[:gameId] = gameid
+        shots = shots[:, vcat(ncol(shots), collect(1:(ncol(shots)- 1)))]
+        CSV.write(string(path, "/", gameid, ".csv"), shots)
+    end
+end
+
+function season_write_shots_lf(season, path)
+    if season >= 2017
+        numgames = 1281
+    else
+        numgames = 1280
+    end
+    gameids = [string(season, "02", string(id, pad = 4)) for id in 1:numgames] # "02" here stands for regular season
+    for i = 1:numgames
+        println(string("Getting and writing gameid ", gameids[i], "."))
+        write_shots_lf(gameids[i], path)
+    end
 end
