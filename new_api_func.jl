@@ -60,6 +60,17 @@ function stats_dressed_skaters(box_score_output, side)
     return r
 end
 
+function extract_goalie(sht_elem)
+    ret = Array{NamedTuple{(:player, :playerType), Tuple{NamedTuple{(:id, :fullName, :link), Tuple{Int64, String, String}}, String}}, 1}(undef, 1)
+    r = [elm for elm in sht_elem if elm[:playerType] == "Goalie"]
+    if length(r) > 0
+        ret[1] = r[1]
+    else
+        ret[1] = (player = (id = -99, fullName = "Empty net", link = "l"), playerType = "Goalie")
+    end
+    return ret
+end
+
 function shots_lf(live_feed_output)
     shots = [evnts for evnts in pairs(live_feed_output[:liveData][:plays][:allPlays]) if evnts[2][:result][:event] in ["Shot", "Goal"]]
 
@@ -73,7 +84,8 @@ function shots_lf(live_feed_output)
 
     tm[:shotNumber] = 1:nrow(tm)
 
-    goalie = DataFrame([dropnames(evnt[2][:players][2][:player], (:link, )) for evnt in shots])
+    gls = [sts[2][:players] for sts in shots]
+    goalie = DataFrame([dropnames(extract_goalie(evnt)[1][1], (:link, )) for evnt in gls])
     rename!(goalie, :id => :idGoalie)
     rename!(goalie, :fullName => :fullNameGoalie)
 
